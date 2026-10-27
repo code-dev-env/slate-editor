@@ -7,7 +7,7 @@ let confirmed = false;
 
 function createWindow() {
   win = new BrowserWindow({
-    width: 1100, height: 750, autoHideMenuBar: true, show: false, title: 'Custom Editor',
+    width: 1100, height: 750, autoHideMenuBar: true, show: false, title: 'Slate Editor',
     icon: path.join(__dirname, 'build', 'icon.png'),
     webPreferences: { sandbox: false, preload: path.join(__dirname, 'preload.js') }
   });
@@ -19,7 +19,7 @@ function createWindow() {
     e.preventDefault();
     const r = dialog.showMessageBoxSync(win, {
       type: 'question', buttons: ['Yes', 'No'], defaultId: 1, cancelId: 1,
-      title: 'Custom Editor', message: 'Close the editor?',
+      title: 'Slate Editor', message: 'Close the editor?',
       detail: 'Any unsaved changes will be lost.'
     });
     if (r === 0) { confirmed = true; win.close(); }

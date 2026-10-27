@@ -1,5 +1,5 @@
 {
-  "name": "custom-editor",
+  "name": "slate-editor",
   "version": "1.0.0",
   "main": "main.js",
   "scripts": {
@@ -15,8 +15,8 @@
     "monaco-editor": "^0.52.0"
   },
   "build": {
-    "appId": "local.custom.editor",
-    "productName": "Custom Editor",
+    "appId": "local.slate.editor",
+    "productName": "Slate Editor",
     "asar": false,
     "win": {
       "target": "nsis",
@@ -39,7 +39,7 @@
       "perMachine": false,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "artifactName": "CustomEditor-Setup.exe"
+      "artifactName": "SlateEditor-Setup.exe"
     }
   }
 }

@@ -52,7 +52,7 @@ require(['vs/editor/editor.main'], () => {
       el.onauxclick = (e) => { if (e.button === 1) closeTab(t); };
       tabsEl.appendChild(el);
     }
-    document.title = (active ? active.name + (active.dirty ? ' •' : '') + ' - ' : '') + 'Editor';
+    document.title = (active ? active.name + (active.dirty ? ' •' : '') + ' - ' : '') + 'Slate Editor';
   }
 
   function activate(t) {
