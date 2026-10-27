@@ -1,0 +1,45 @@
+{
+  "name": "custom-editor",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win nsis",
+    "build": "electron-builder --win nsis"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^26.15.3"
+  },
+  "dependencies": {
+    "monaco-editor": "^0.52.0"
+  },
+  "build": {
+    "appId": "local.custom.editor",
+    "productName": "Custom Editor",
+    "asar": false,
+    "win": {
+      "target": "nsis",
+      "signAndEditExecutable": true,
+      "icon": "build/icon.ico"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "index.html",
+      "build/icon.png",
+      "renderer.js",
+      "node_modules/monaco-editor/min/**/*"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "artifactName": "CustomEditor-Setup.exe"
+    }
+  }
+}

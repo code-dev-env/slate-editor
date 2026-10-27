@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Custom Editor</title>
+<style>
+  :root { --bg:#fff; --bar:#f3f3f3; --tab:#ececec; --tab-active:#fff; --fg:#333; --border:#ddd; --accent:#007acc; }
+  body.dark { --bg:#1e1e1e; --bar:#252526; --tab:#2d2d2d; --tab-active:#1e1e1e; --fg:#ccc; --border:#111; --accent:#0e639c; }
+  html,body { margin:0; height:100%; background:var(--bg); color:var(--fg); font:13px "Segoe UI",sans-serif; overflow:hidden; }
+  #app { display:flex; flex-direction:column; height:100%; }
+  #bar { display:flex; background:var(--bar); border-bottom:1px solid var(--border); align-items:stretch; }
+  #tabs { display:flex; flex:1; overflow-x:auto; }
+  #tabs::-webkit-scrollbar { height:4px; }
+  .tab { display:flex; align-items:center; gap:8px; padding:8px 12px; background:var(--tab); border-right:1px solid var(--border); cursor:pointer; white-space:nowrap; user-select:none; }
+  .tab.active { background:var(--tab-active); box-shadow:inset 0 2px 0 var(--accent); }
+  .tab .x { opacity:.6; padding:0 4px; border-radius:3px; }
+  .tab .x:hover { opacity:1; background:rgba(128,128,128,.3); }
+  .dot { color:var(--accent); }
+  button { background:none; border:none; color:var(--fg); padding:0 14px; cursor:pointer; font-size:15px; }
+  button:hover { background:rgba(128,128,128,.2); }
+  #editor { flex:1; }
+  #drop { display:none; position:fixed; inset:0; background:rgba(0,122,204,.25); border:3px dashed var(--accent); z-index:99; pointer-events:none; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="bar"><div id="tabs"></div><button id="open" title="Open file (Ctrl+O)">Open</button><button id="new" title="New tab (Ctrl+N)">+</button><button id="theme" title="Toggle light/dark">◐</button></div>
+  <div id="editor"></div>
+</div>
+<div id="drop"></div>
+<script src="node_modules/monaco-editor/min/vs/loader.js"></script>
+<script src="renderer.js"></script>
+</body>
+</html>

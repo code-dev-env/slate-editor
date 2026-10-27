@@ -1,0 +1,24 @@
+# Dependencies (restore with `npm install`)
+node_modules/
+
+# Build output (installer .exe etc.; produced by `npm run build`)
+dist/
+out/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Env / local settings
+.env
+.env.*
+.claude/
