@@ -7,7 +7,7 @@ A lightweight, tabbed desktop code and text editor for Windows, built with [Elec
 - **Monaco-powered editing**: syntax highlighting, minimap, find and replace, multi-cursor editing and the other core Monaco editing features.
 - **Tabbed interface**: open multiple files at once, with a modified indicator (●) on tabs that have unsaved changes.
 - **Automatic language detection**: the language mode is chosen from the file extension; unknown types open as plain text.
-- **Light and dark themes**: follows your system preference on first launch. Your choice is remembered after you toggle it.
+- **18 themes**: follows your system light/dark preference on first launch. Pick a theme from the Themes menu and your choice is remembered.
 - **Drag and drop**: drop one or more files onto the window to open them.
 - **Command-line / "Open with" support**: pass file paths as arguments to open them on launch.
 - **Safe closing**: confirmation prompts before discarding unsaved changes in a tab or closing the application.
@@ -25,7 +25,7 @@ A lightweight, tabbed desktop code and text editor for Windows, built with [Elec
 | `Ctrl+Shift+Tab` | Previous tab |
 | Middle-click on a tab | Close that tab |
 
-The toolbar also provides **Open**, **+** (new tab) and **◐** (toggle light/dark theme) buttons. Standard Monaco shortcuts (for example `Ctrl+F` to find and `Ctrl+H` to replace) are available inside the editor.
+The toolbar also provides **Open**, **+** (new tab) and **◐ Themes** (open the theme picker) buttons. Standard Monaco shortcuts (for example `Ctrl+F` to find and `Ctrl+H` to replace) are available inside the editor.
 
 ## Requirements
 

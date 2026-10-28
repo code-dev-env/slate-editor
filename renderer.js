@@ -11,16 +11,80 @@ require(['vs/editor/editor.main'], () => {
   let active = null;
   let untitled = 0;
 
-  const dark = localStorage.getItem('theme')
-    ? localStorage.getItem('theme') === 'dark'
-    : matchMedia('(prefers-color-scheme: dark)').matches;
-  document.body.classList.toggle('dark', dark);
-
   const editor = monaco.editor.create(document.getElementById('editor'), {
-    theme: dark ? 'vs-dark' : 'vs', automaticLayout: true, fontSize: 14,
+    automaticLayout: true, fontSize: 14,
     fontFamily: 'Consolas, "Courier New", monospace', minimap: { enabled: true },
     model: null, wordWrap: 'off', scrollBeyondLastLine: false
   });
+
+  // [id, name, base, bg, fg, accent, keyword, string, number, comment]
+  const THEMES = [
+    ['dark',   'Dark',          'vs-dark', '#1e1e1e', '#cccccc', '#0e8fe0', '#569cd6', '#ce9178', '#b5cea8', '#6a9955'],
+    ['light',  'Light',         'vs',      '#ffffff', '#333333', '#007acc', '#0000ff', '#a31515', '#098658', '#008000'],
+    ['violet', 'Violet',        'vs-dark', '#1f1530', '#e0d4f5', '#9d5cf0', '#c792ea', '#f4a8ff', '#ffcb6b', '#7e6a9e'],
+    ['indigo', 'Indigo',        'vs-dark', '#141737', '#d3d8f5', '#5c6bf0', '#8c9eff', '#a5d6ff', '#ffb86c', '#6370a8'],
+    ['blue',   'Blue',          'vs-dark', '#0b2239', '#d0e4f7', '#2a9df4', '#4fc3f7', '#ffe082', '#ffab91', '#5c86a8'],
+    ['green',  'Green',         'vs-dark', '#10261a', '#d3efdc', '#2ecc71', '#69f0ae', '#e6ee9c', '#ffcc80', '#5e8f70'],
+    ['yellow', 'Yellow',        'vs',      '#fff9d6', '#4a4020', '#d4a900', '#b58900', '#2e7d32', '#c62828', '#9a9060'],
+    ['orange', 'Orange',        'vs-dark', '#2b1808', '#f6e0cc', '#ff8c1a', '#ffa040', '#ffe0a0', '#ff7043', '#a07850'],
+    ['red',    'Red',           'vs-dark', '#2a0e12', '#f5d6d8', '#ee3b4b', '#ff6b7a', '#ffc27a', '#ffa8b0', '#a06068'],
+    ['pink',   'Pink',          'vs',      '#ffeef5', '#4a2335', '#e91e8c', '#d81b78', '#7b1fa2', '#e65100', '#b07a92'],
+    ['teal',   'Teal / Cyan',   'vs-dark', '#0a2828', '#cdeeee', '#1ec8c8', '#4dd0e1', '#b2f5a0', '#ffd180', '#5a9090'],
+    ['sky',    'Sky',           'vs',      '#e8f5ff', '#1f3a52', '#0288d1', '#0277bd', '#2e7d32', '#d84315', '#6d93b0'],
+    ['mint',   'Mint',          'vs',      '#e8fbf1', '#1d4030', '#00a86b', '#00796b', '#6a1b9a', '#e65100', '#6aa088'],
+    ['sunset', 'Sunset',        'vs-dark', '#2a1033', '#fbe3d6', '#ff5e7e', '#ff7a90', '#ffd166', '#f78c6b', '#a0708a'],
+    ['mono',   'Monokai',       'vs-dark', '#272822', '#f8f8f2', '#a6e22e', '#f92672', '#e6db74', '#ae81ff', '#75715e'],
+    ['solar',  'Solarized',     'vs',      '#fdf6e3', '#586e75', '#268bd2', '#859900', '#2aa198', '#d33682', '#93a1a1'],
+    ['coffee', 'Coffee',        'vs-dark', '#241a14', '#e8d8c8', '#c68b59', '#d9a066', '#a8c686', '#e0a0a0', '#8a7060'],
+    ['slate',  'Slate',         'vs-dark', '#22272e', '#adbac7', '#6cb6ff', '#f47067', '#96d0ff', '#6cb6ff', '#768390'],
+  ];
+
+  const mix = (a, b, t) => '#' + [1, 3, 5].map(i =>
+    Math.round(parseInt(a.substr(i, 2), 16) * (1 - t) + parseInt(b.substr(i, 2), 16) * t)
+      .toString(16).padStart(2, '0')).join('');
+
+  for (const [id, , base, bg, fg, accent, kw, str, num, cmt] of THEMES) {
+    monaco.editor.defineTheme('t-' + id, {
+      base, inherit: true,
+      rules: [
+        { token: 'keyword', foreground: kw.slice(1) }, { token: 'string', foreground: str.slice(1) },
+        { token: 'number', foreground: num.slice(1) }, { token: 'comment', foreground: cmt.slice(1), fontStyle: 'italic' },
+        { token: 'type', foreground: accent.slice(1) }, { token: 'tag', foreground: kw.slice(1) },
+        { token: 'attribute.name', foreground: num.slice(1) }, { token: 'attribute.value', foreground: str.slice(1) },
+      ],
+      colors: {
+        'editor.background': bg, 'editor.foreground': fg,
+        'editor.lineHighlightBackground': mix(bg, fg, .07), 'editor.selectionBackground': accent + '55',
+        'editorCursor.foreground': accent, 'editorLineNumber.foreground': mix(bg, fg, .4),
+        'editorLineNumber.activeForeground': accent, 'editorGutter.background': bg,
+        'minimap.background': bg, 'editorWidget.background': mix(bg, fg, .06),
+        'scrollbarSlider.background': mix(bg, fg, .2) + '88',
+      }
+    });
+  }
+
+  const themesEl = document.getElementById('themes');
+  function applyTheme(id) {
+    const t = THEMES.find(x => x[0] === id) || THEMES[0];
+    const [tid, , , bg, fg, accent] = t;
+    const s = document.body.style;
+    s.setProperty('--bg', bg); s.setProperty('--fg', fg); s.setProperty('--accent', accent);
+    s.setProperty('--bar', mix(bg, fg, .06)); s.setProperty('--tab', mix(bg, fg, .12));
+    s.setProperty('--tab-active', bg); s.setProperty('--border', mix(bg, fg, .2));
+    monaco.editor.setTheme('t-' + tid);
+    try { localStorage.setItem('theme', tid); } catch {}
+    for (const o of themesEl.children) o.classList.toggle('sel', o.dataset.id === tid);
+  }
+  for (const [id, name, , bg, , accent] of THEMES) {
+    const o = document.createElement('div');
+    o.className = 'opt'; o.dataset.id = id;
+    o.innerHTML = '<span class="sw"><i></i></span><span></span>';
+    o.firstChild.style.background = bg;
+    o.firstChild.firstChild.style.background = accent;
+    o.lastChild.textContent = name;
+    o.onclick = () => { applyTheme(id); themesEl.classList.remove('open'); editor.focus(); };
+    themesEl.appendChild(o);
+  }
 
   function langFor(name) {
     const ext = '.' + name.split('.').pop().toLowerCase();
@@ -52,7 +116,7 @@ require(['vs/editor/editor.main'], () => {
       el.onauxclick = (e) => { if (e.button === 1) closeTab(t); };
       tabsEl.appendChild(el);
     }
-    document.title = (active ? active.name + (active.dirty ? ' •' : '') + ' - ' : '') + 'Slate Editor';
+    document.title = (active ? active.name + (active.dirty ? ' •' : '') + ' - ' : '') + 'Editor';
   }
 
   function activate(t) {
@@ -117,12 +181,9 @@ require(['vs/editor/editor.main'], () => {
   async function openDialog() { for (const p of await api.open()) await openPath(p); }
   document.getElementById('open').onclick = openDialog;
   document.getElementById('new').onclick = newTab;
-  document.getElementById('theme').onclick = () => {
-    const d = !document.body.classList.contains('dark');
-    document.body.classList.toggle('dark', d);
-    monaco.editor.setTheme(d ? 'vs-dark' : 'vs');
-    localStorage.setItem('theme', d ? 'dark' : 'light');
-  };
+  document.getElementById('theme').onclick = (e) => { e.stopPropagation(); themesEl.classList.toggle('open'); };
+  addEventListener('click', (e) => { if (!themesEl.contains(e.target)) themesEl.classList.remove('open'); });
+  addEventListener('keydown', (e) => { if (e.key === 'Escape') themesEl.classList.remove('open'); });
 
   addEventListener('keydown', (e) => {
     if (!e.ctrlKey) return;
@@ -153,6 +214,10 @@ require(['vs/editor/editor.main'], () => {
     drop.style.display = 'none';
     for (const f of e.dataTransfer.files) await openPath(api.pathOf(f));
   }, cap);
+
+  let saved = null;
+  try { saved = localStorage.getItem('theme'); } catch {}
+  applyTheme(saved || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
 
   api.argv().then(async (paths) => {
     for (const p of paths) await openPath(p);
