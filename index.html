@@ -3,6 +3,13 @@
   <head>
     <meta charset="utf-8" />
     <title>Slate Editor</title>
+    <script>
+      // Apply the saved theme colours before first paint (Monaco loads much later).
+      try {
+        const v = JSON.parse(localStorage.getItem("themeVars"));
+        for (const k in v) document.documentElement.style.setProperty(k, v[k]);
+      } catch {}
+    </script>
     <style>
       :root {
         --bg: #fff;
@@ -84,6 +91,10 @@
       #editor {
         flex: 1;
       }
+      #loading {
+        padding: 16px;
+        opacity: 0.6;
+      }
       #bar {
         position: relative;
       }
@@ -155,7 +166,7 @@
         ><button id="theme" title="Themes">◐ Themes</button>
         <div id="themes"></div>
       </div>
-      <div id="editor"></div>
+      <div id="editor"><div id="loading">Loading editor…</div></div>
     </div>
     <div id="drop"></div>
     <script src="node_modules/monaco-editor/min/vs/loader.js"></script>

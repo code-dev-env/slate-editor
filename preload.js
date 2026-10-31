@@ -7,6 +7,7 @@ contextBridge.exposeInMainWorld("api", {
   open: () => ipcRenderer.invoke("open"),
   saveAs: (n) => ipcRenderer.invoke("saveAs", n),
   argv: () => ipcRenderer.invoke("argv"),
+  setHasWork: (v) => ipcRenderer.send("hasWork", v),
   pathOf: (file) => webUtils.getPathForFile(file),
   basename: (p) => path.basename(p),
   monacoBase:

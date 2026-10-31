@@ -9,7 +9,7 @@ A lightweight, tabbed desktop code and text editor for Windows, built with [Elec
 - **Automatic language detection**: the language mode is chosen from the file extension; unknown types open as plain text.
 - **18 themes**: follows your system light/dark preference on first launch. Pick a theme from the Themes menu and your choice is remembered.
 - **Drag and drop**: drop one or more files onto the window to open them.
-- **Command-line / "Open with" support**: pass file paths as arguments to open them on launch.
+- **Command-line / "Open with" support**: pass file paths as arguments to open them on launch. Launching the app again opens another window in the running instance.
 - **Safe closing**: confirmation prompts before discarding unsaved changes in a tab or closing the application.
 - **Offline**: Monaco is bundled locally, so no network connection is required.
 
@@ -29,8 +29,8 @@ The toolbar also provides **Open**, **+** (new tab) and **◐ Themes** (open the
 
 ## Requirements
 
-- Windows 10 or later (the installer targets Windows)
-- [Node.js](https://nodejs.org/) and npm, only needed to run from source or build the installer
+- Windows 10 or later (the installer and portable build target Windows)
+- [Node.js](https://nodejs.org/) and npm, only needed to run from source or build
 
 ## Getting Started
 
@@ -54,15 +54,20 @@ To open specific files on launch:
 npm start -- path/to/file.txt another/file.js
 ```
 
-## Building the Installer
+## Building
 
-Create a Windows NSIS installer with [electron-builder](https://www.electron.build/):
+Create a Windows NSIS installer and a portable executable with [electron-builder](https://www.electron.build/):
 
 ```bash
 npm run build
 ```
 
-The installer is written to `dist/SlateEditor-Setup.exe`. It performs a one-click, per-user install and creates desktop and Start Menu shortcuts.
+The output is written to `dist/`:
+
+- `SlateEditor-Setup.exe`: the installer. It performs a one-click, per-user install and creates desktop and Start Menu shortcuts.
+- `SlateEditor-Portable-<version>.exe`: a portable build that needs no installation.
+
+To build only one of them, use `npm run dist:installer` or `npm run dist:portable`.
 
 ## Project Structure
 

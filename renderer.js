@@ -14,6 +14,7 @@ require(["vs/editor/editor.main"], () => {
   let active = null;
   let untitled = 0;
 
+  document.getElementById("loading").remove();
   const editor = monaco.editor.create(document.getElementById("editor"), {
     automaticLayout: true,
     fontSize: 14,
@@ -288,23 +289,49 @@ require(["vs/editor/editor.main"], () => {
   }
 
   const themesEl = document.getElementById("themes");
-  function applyTheme(id) {
+  const darkMq = matchMedia("(prefers-color-scheme: dark)");
+  let pref = "auto"; // saved choice: "auto" (follow Windows) or a theme id
+
+  function applyTheme(choice) {
+    pref = choice;
+    const id = choice === "auto" ? (darkMq.matches ? "dark" : "light") : choice;
     const t = THEMES.find((x) => x[0] === id) || THEMES[0];
     const [tid, , , bg, fg, accent] = t;
-    const s = document.body.style;
-    s.setProperty("--bg", bg);
-    s.setProperty("--fg", fg);
-    s.setProperty("--accent", accent);
-    s.setProperty("--bar", mix(bg, fg, 0.06));
-    s.setProperty("--tab", mix(bg, fg, 0.12));
-    s.setProperty("--tab-active", bg);
-    s.setProperty("--border", mix(bg, fg, 0.2));
+    const vars = {
+      "--bg": bg,
+      "--fg": fg,
+      "--accent": accent,
+      "--bar": mix(bg, fg, 0.06),
+      "--tab": mix(bg, fg, 0.12),
+      "--tab-active": bg,
+      "--border": mix(bg, fg, 0.2),
+    };
+    for (const k in vars) document.body.style.setProperty(k, vars[k]);
     monaco.editor.setTheme("t-" + tid);
     try {
-      localStorage.setItem("theme", tid);
+      localStorage.setItem("theme", choice);
+      // read by the inline script in index.html so the first paint is already themed
+      localStorage.setItem("themeVars", JSON.stringify(vars));
     } catch {}
     for (const o of themesEl.children)
-      o.classList.toggle("sel", o.dataset.id === tid);
+      o.classList.toggle("sel", o.dataset.id === choice);
+  }
+  darkMq.addEventListener("change", () => {
+    if (pref === "auto") applyTheme("auto");
+  });
+  {
+    const o = document.createElement("div");
+    o.className = "opt";
+    o.dataset.id = "auto";
+    o.innerHTML = '<span class="sw"><i></i></span><span>Auto (System)</span>';
+    o.firstChild.style.background = "linear-gradient(90deg,#1e1e1e 50%,#fff 50%)";
+    o.firstChild.firstChild.style.background = "#0e8fe0";
+    o.onclick = () => {
+      applyTheme("auto");
+      themesEl.classList.remove("open");
+      editor.focus();
+    };
+    themesEl.appendChild(o);
   }
   for (const [id, name, , bg, , accent] of THEMES) {
     const o = document.createElement("div");
@@ -397,6 +424,8 @@ require(["vs/editor/editor.main"], () => {
       };
       tabsEl.appendChild(el);
     }
+    // Only opened files or edited untitled tabs warrant a close confirmation.
+    api.setHasWork(tabs.some((t) => t.path || t.dirty));
     document.title =
       (active ? active.name + (active.dirty ? " •" : "") + " - " : "") +
       "Editor";
@@ -437,12 +466,22 @@ require(["vs/editor/editor.main"], () => {
     } else render();
   }
 
-  async function openPath(p) {
+  // Reads all files concurrently, then opens them in order so tab order is stable.
+  async function openPaths(paths) {
+    const reads = paths.map((p) => {
+      const r = api.read(p);
+      r.catch(() => {}); // surfaced via openPath's own await
+      return r;
+    });
+    for (let i = 0; i < paths.length; i++) await openPath(paths[i], reads[i]);
+  }
+
+  async function openPath(p, pending) {
     const existing = tabs.find((t) => t.path === p);
     if (existing) return activate(existing);
     try {
       const name = api.basename(p),
-        text = await api.read(p);
+        text = await (pending || api.read(p));
       const blank =
         active && !active.path && active.model.getValueLength() === 0;
       if (!blank) return addTab(name, text, p);
@@ -477,7 +516,7 @@ require(["vs/editor/editor.main"], () => {
   }
 
   async function openDialog() {
-    for (const p of await api.open()) await openPath(p);
+    await openPaths(await api.open());
   }
   document.getElementById("open").onclick = openDialog;
   document.getElementById("new").onclick = newTab;
@@ -556,7 +595,7 @@ require(["vs/editor/editor.main"], () => {
       e.stopPropagation();
       depth = 0;
       drop.style.display = "none";
-      for (const f of e.dataTransfer.files) await openPath(api.pathOf(f));
+      await openPaths([...e.dataTransfer.files].map((f) => api.pathOf(f)));
     },
     cap,
   );
@@ -565,13 +604,15 @@ require(["vs/editor/editor.main"], () => {
   try {
     saved = localStorage.getItem("theme");
   } catch {}
-  applyTheme(
-    saved ||
-      (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"),
-  );
+  applyTheme(saved || "auto");
 
+  // Theme picked in another window: localStorage is shared, so just follow it.
+  addEventListener("storage", (e) => {
+    if (e.key === "theme" && e.newValue && e.newValue !== pref)
+      applyTheme(e.newValue);
+  });
   api.argv().then(async (paths) => {
-    for (const p of paths) await openPath(p);
+    await openPaths(paths);
     if (!tabs.length) newTab();
   });
 });

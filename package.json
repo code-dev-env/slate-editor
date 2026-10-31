@@ -4,8 +4,10 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "dist": "electron-builder --win nsis",
-    "build": "electron-builder --win nsis"
+    "dist": "electron-builder --win nsis portable",
+    "build": "electron-builder --win nsis portable",
+    "dist:installer": "electron-builder --win nsis",
+    "dist:portable": "electron-builder --win portable"
   },
   "devDependencies": {
     "electron": "^33.0.0",
@@ -19,7 +21,7 @@
     "productName": "Slate Editor",
     "asar": false,
     "win": {
-      "target": "nsis",
+      "target": ["nsis", "portable"],
       "signAndEditExecutable": true,
       "icon": "build/icon.ico"
     },
@@ -40,6 +42,9 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "artifactName": "SlateEditor-Setup.exe"
+    },
+    "portable": {
+      "artifactName": "SlateEditor-Portable-${version}.exe"
     }
   }
 }
